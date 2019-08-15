@@ -31,7 +31,8 @@ else # fallback to raspberry
 endif
 
 # Where you want it installed when you do 'make install'
-PREFIX=/usr/local
+TOP=tce_extension
+PREFIX=${TOP}/ArduiPi_OLED/usr/local
 
 # Library parameters
 # where to put the lib
@@ -69,20 +70,24 @@ Wrapper.o: Wrapper.cpp
 # Install the library to LIBPATH
 install: 
 	@echo "[Install Library]"
-	@if ( test ! -d $(PREFIX)/lib ) ; then mkdir -p $(PREFIX)/lib ; fi
-	@install -m 0755 ${LIBNAME} ${LIBDIR}
-	@ln -sf ${LIBDIR}/${LIBNAME} ${LIBDIR}/${LIB}.so.1
-	@ln -sf ${LIBDIR}/${LIBNAME} ${LIBDIR}/${LIB}.so
-	@ldconfig
-	@rm -rf ${LIB}.*
+	if ( test ! -d $(PREFIX)/lib ) ; then mkdir -p $(PREFIX)/lib ; fi
+	install -m 0755 ${LIBNAME} ${LIBDIR}
+	# ln -sf ${LIBDIR}/${LIBNAME} ${LIBDIR}/${LIB}.so.1
+	# ln -sf ${LIBDIR}/${LIBNAME} ${LIBDIR}/${LIB}.so
+	(cd ${LIBDIR}; ln -sf ${LIBNAME} ${LIB}.so.1)
+	(cd ${LIBDIR}; ln -sf ${LIBNAME} ${LIB}.so)
+	ldconfig
+	rm -rf ${LIB}.*
 
 	@echo "[Install Headers]"
-	@if ( test ! -d $(PREFIX)/include ) ; then mkdir -p $(PREFIX)/include ; fi
-	@cp -f  Adafruit_*.h $(PREFIX)/include
-	@cp -f  ArduiPi_*.h $(PREFIX)/include
-	@cp -f  bcm2835.h $(PREFIX)/include
+	if ( test ! -d $(PREFIX)/include ) ; then mkdir -p $(PREFIX)/include ; fi
+	cp -f  Adafruit_*.h $(PREFIX)/include
+	cp -f  ArduiPi_*.h $(PREFIX)/include
+	cp -f  bcm2835.h $(PREFIX)/include
 	
-	
+tcz:
+	(cd ${TOP}; mksquashfs ArduiPi_OLED gh-ardui-pi-oled.tcz)	
+
 # Uninstall the library 
 uninstall: 
 	@echo "[Uninstall Library]"
